@@ -1,7 +1,7 @@
 #include "GOL.h"
 #include <iostream> //For cout
-#include <cstdlib> //For rand - theoritically not needed, iostream > istream > ostream > ios > xlocnum already includes cstdlib, but it's still good practice to state includes explicitly
-//#include <random> //TEMP: Apparently should be used instead of rand()/srand() from <cstdlib>, check out further
+//#include <cstdlib> //For rand - theoretically not needed, iostream > istream > ostream > ios > xlocnum already includes cstdlib, but it's still good practice to state includes explicitly
+#include <random> //Contains superior randomization functions to rand() and srand() in <cstdlib>
 
 int main()
 {
@@ -12,12 +12,15 @@ int main()
 //TEMP: Draw a grid in the Console
 void GOL::DrawGrid()
 {
+	std::default_random_engine Generator; //Random number generator
+	std::bernoulli_distribution Distribution; //Bernoulli distribution for bool - there should be around 50:50 true:false distribution without (double) stated in the declaration
+
 	for (int i = 1; i < 10; i++)
 	{
 		for (int j = 1; j < 10; j++)
 		{
-			//TEMP: std::rand should not be used, look for some implementation from <random>
-			std::cout << (std::rand() % 2) ? "1" : "0";
+			//Generates a random boolean based on the randomly generated number with a set distribution (should be 50:50)
+			std::cout << (Distribution(Generator)) ? "1" : "0";
 
 			if (j == 9)
 			{
