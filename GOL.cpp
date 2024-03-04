@@ -7,51 +7,19 @@
 
 
 //Game Of Life grid dimensions - static so that it is accessible without GOL instance, const beacuse the std::array size is not dynamic 
-static const int GRID_SIZE_X = 32;
-static const int GRID_SIZE_Y = 20;
+const int GRID_SIZE_X = 20;
+const int GRID_SIZE_Y = 32;
 
 //TEMP: Set as static so that instance of parent class is not needed to call this function
-void DrawGrid();
+//void DrawGrid();
 //TEMP:
-bool CheckNeighbours(std::array<std::array<int, GRID_SIZE_Y>, GRID_SIZE_X>& grid);
+bool CheckNeighbours(std::array<std::array<int, GRID_SIZE_Y>, GRID_SIZE_X>& grid, int x, int y);
 
 int main()
 {
-	DrawGrid();
-	
-}
-
-bool CheckNeighbours(std::array<std::array<int, GRID_SIZE_Y>, GRID_SIZE_X>& grid)
-{
-	int AliveNeighbours = 0; //Count how many cells around are alive
-	int x;
-	int y;
-
-	for (x = -1; x <= 1; x++)
-	{
-		for (y = -1; y <= 1; y++)
-		{
-			if (!((x == 0) && (y == 0)))
-			{
-				if (grid[x][y]) AliveNeighbours += 1;
-			}
-		}
-	}
-
-	if (grid[x][y] == 1 && AliveNeighbours < 2) return true;//Any live cell with fewer than two live neighbors dies, as if by underpopulation.
-	if (grid[x][y] == 1 && (AliveNeighbours == 2 || AliveNeighbours == 3)) return true;//Any live cell with two or three live neighbors lives on to the next generation.
-	if (grid[x][y] == 1 && AliveNeighbours > 3) return false;//Any live cell with more than three live neighbors dies, as if by overpopulation.
-	if (grid[x][y] == 0 && AliveNeighbours == 3) return true;//Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
-
-	return false;
-}
-
-//TEMP: Draw a grid in the Console
-void DrawGrid()
-{
 	std::default_random_engine generator; //Random number generator
 	std::bernoulli_distribution distribution; //Bernoulli distribution for bool - there should be around 50:50 true:false distribution without (double) stated in the declaration
-	
+
 	//Game Of Life grid arrays - using std::array<> instead of int[][] because of added functionality
 	std::array<std::array<int, GRID_SIZE_Y>, GRID_SIZE_X> gridPrinted{}; //Grid that is printed to the Console
 	std::array<std::array<int, GRID_SIZE_Y>, GRID_SIZE_X> gridCalculated{}; //"Buffer" grid that is used for calculating cells states
@@ -77,20 +45,59 @@ void DrawGrid()
 			std::cout << std::endl;
 		}
 
-		for (auto& a : gridCalculated)
+		for (int i = 0; i < GRID_SIZE_X; ++i)
 		{
-			for (auto& b : a)
+			for (int j = 0; j < GRID_SIZE_Y; ++j)
 			{
-				/*
-				if (CheckNeighbours(gridPrinted)) { gridCalculated[a][b] = 1; }
-				else { gridCalculated[a][b] = 0; }
-				*/
+				if (CheckNeighbours(gridPrinted, i, j))
+				{
+					gridCalculated[i][j] = 1;
+				}
+				else {
+					gridCalculated[i][j] = 0;
+				}
 			}
 		}
+
+		gridPrinted.swap(gridCalculated); //Write the calculated cells update (gridCalculated) into the array that should be printed to the Console (gridPrinted)
+		
 
 		Sleep(500); //Wait x milliseconds
 		system("cls"); //Clear Console
 	}
 }
 
+//Check how many of the cell's neighbouring cells are alive and apply Game Of Life's rules to it then return whether the cell should be alive or dead
+bool CheckNeighbours(std::array<std::array<int, GRID_SIZE_Y>, GRID_SIZE_X>& grid, int x, int y)
+{
+	int AliveNeighbours = 0; //Count how many cells around are alive
 
+	for (int i = -1; i <= 1; i++)
+	{
+		for (int j = -1; j <= 1; j++)
+		{
+			if (!((i == 0) && (j == 0)))
+			{
+				int xi = x + i;
+				int yj = y + j;
+				if (xi >= 0 && xi < GRID_SIZE_X && yj >= 0 && yj < GRID_SIZE_Y && grid[xi][yj] == 1) //Make sure the array does not go out of bounds
+				{
+					++AliveNeighbours;
+				}
+			}
+		}
+	}
+
+	if (grid[x][y] == 1 && AliveNeighbours < 2) return true;//Any live cell with fewer than two live neighbors dies, as if by underpopulation.
+	if (grid[x][y] == 1 && (AliveNeighbours == 2 || AliveNeighbours == 3)) return true;//Any live cell with two or three live neighbors lives on to the next generation.
+	if (grid[x][y] == 1 && AliveNeighbours > 3) return false;//Any live cell with more than three live neighbors dies, as if by overpopulation.
+	if (grid[x][y] == 0 && AliveNeighbours == 3) return true;//Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
+
+	return false;
+}
+
+//TEMP: Draw a grid in the Console
+/*void DrawGrid()
+{
+
+}*/
